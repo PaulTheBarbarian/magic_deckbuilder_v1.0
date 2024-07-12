@@ -5,7 +5,10 @@ useful link: https://scryfall.com/docs/api
 '''
 
 import requests
+import urllib.parse
 import csv
+
+api_main_link = 'https://api.scryfall.com'
 
 # THE FIRST PART OF THIS CODE IS DESIGNED TO TEST THE CALL TO THE API
 # THE CALL USED WAS ONLY TO ALL CARDS NAMES
@@ -32,6 +35,32 @@ def register_all_cards_names():
 # magic the gathering online
 # mtgo_id must be populated (type: int)
 
+'''
 with open('list_cards_mtgo.csv', 'w', newline='') as file_mtgo:
     list_cards_mtgo = csv.writer(file_mtgo, delimiter= ';')
     list_cards_mtgo.writerow((1, 2, 3, 'test'))
+'''
+query_test = "one ring"
+query_test= urllib.parse.quote(query_test)
+
+def fulltextsearch(query_test): # Function to optimize fulltextsearch
+    card_search = '/cards/search?'
+    link_for_query = api_main_link + card_search + 'q=' + query_test
+    return link_for_query
+test_search = requests.get(fulltextsearch(query_test))
+
+total_cards_search = test_search.json()['total_cards']
+
+print(f"We've detected {total_cards_search} cards in your query")
+print('They are:')
+query_result = test_search.json()['data']
+# print(query_result[0]['name']) #  this line was used as testing
+
+def save_query_results(query_result):
+    with open('list_query_result_only_names.csv', 'w', newline='') as query_name_file:
+        for i in range(total_cards_search):
+            list_query_result_only_names = csv.writer(query_name_file, delimiter=';')
+            list_query_result_only_names.writerow([query_result[i]['name']])
+
+save_query_results(query_result)
+
